@@ -250,7 +250,7 @@ if __name__ == '__main__':
     '''
     prompts = ds_test["text"]
     ids = ds_test["idx"]
-    f_preds = os.path.join(output_dir, "preds_temp_09.txt")
+    f_preds = os.path.join(output_dir, "preds_temp_09.csv")
 
     with open(f_preds, 'a') as file_preds:
         file_preds.write("idx;preds\n")

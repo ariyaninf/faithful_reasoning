@@ -1,0 +1,10 @@
+Target: Fine-tuning Llama2-13b-chat-hf to generate the correct entailment proofs obtained from the shortest
+        reasoning paths. We implemented causalLM automodel to generate 400 new tokens as the answer.
+Quantization: 4-bit
+Dataset: Containing only 100K positive examples
+Output: trained model and "preds_temp_09.csv" file containing predicted (generated) proofs from test set.
+
+TO DO:
+1. Extract Synthetic_CounterEx.zip, put the extracted files in folder dataset/
+2. Download the pretrained model from https://huggingface.co/meta-llama/Llama-2-13b-chat-hf
+3. Run slurm/run_ft_genProofs_causalLM.sh, most arguments are already modified.
