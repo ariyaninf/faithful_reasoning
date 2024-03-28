@@ -16,12 +16,10 @@ def init():
     args_parser.add_argument("--dataset", default="SENT_inferred_2sat_5fixVars_5fixCls_2K_100_OR", type=str)
     args_parser.add_argument("--dataset_dir", default="dataset/Synthetic_CounterEx/5_var_5_cls", type=str)
     args_parser.add_argument("--output_dir", default="output/trained_genProof", type=str)
-    args_parser.add_argument("--model_name", default="save-model-llama2", type=str)
-    args_parser.add_argument("--model_dir", default="output/trained_genProof/Llama-2-7b-chat-hf/"
-                                                    "SENT_inferred_2sat_5fixVars_5fixCls_entailed_1K_100_OR_type5_4bit"
-                             , type=str)
-    args_parser.add_argument("--format_type", default=5, type=int)
-    args_parser.add_argument("--load_in_bit", default=4, type=int)
+    args_parser.add_argument("--model_name", default="Llama-2-13b-chat-hf", type=str)
+    args_parser.add_argument("--model_dir", default="meta-llama", type=str)
+    args_parser.add_argument("--format_type", default=5, type=int)  # 5 works best in Llama2-7b-chat
+    args_parser.add_argument("--load_in_bit", default=4, type=int)  # 8, 4
     args_parser.add_argument("--batch_size", default=4, type=int)
     args_parser.add_argument("--lora_alpha", default=16, type=int)
     args_parser.add_argument("--lora_dropout", default=0.1, type=float)
