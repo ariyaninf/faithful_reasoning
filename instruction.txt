@@ -8,3 +8,21 @@ TO DO:
 1. Extract Synthetic_CounterEx.zip, put the extracted files in folder dataset/
 2. Download the pretrained model from https://huggingface.co/meta-llama/Llama-2-13b-chat-hf
 3. Run slurm/run_ft_genProofs_causalLM.sh, most arguments are already modified.
+
+
+--=== FINETUNING WITH UNSLOTH (Llama-3-8b-Instruct) ===--
+
+Entailments: Fine-tuning model to predict entailments, the answer is "yes"/"no".
+Inconsistencies: Fine-tuning model to answer if there is any inconsistency(es) in the set of premises.
+Dataset: Each dataset contains 10K train, 1K val, and 1K test in balanced distribution of positive and negative examples.
+        Datasets are also balanced according to k-hop. 
+Output: trained model and "predictions.csv" file containing generated answer from test set. 
+
+K-hop means the number steps needed to derive the conslusion.
+1-hop means that the supported premis(es) are existed already in the input. 
+
+TO DO:
+1. Download the dataset from: https://drive.google.com/drive/folders/1rwm0ShzFV2wU9_eQWUrtFCSkNRk5YMV7?usp=sharing.
+2. Install required libraries in requirement.txt.
+3. Run bash files in folder slurm. Most arguments are modified accordingly to the experiment scenarios. 
+
