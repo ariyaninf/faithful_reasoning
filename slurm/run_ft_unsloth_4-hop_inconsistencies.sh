@@ -23,7 +23,7 @@ cd ${WORKDIR}
 
 python3 ft_unsloth_llama3.py \
   --dataset_name 2sat_50mixVars_50fixCls_4-hop_10K_inconsistencies_500_OR \
-  --dataset_di dataset/Inconsistencies/50_vars_50_cls \
+  --dataset_di dataset/Inconsistencies/50vars_50cls \
   --model_id unsloth/llama-3-8b-Instruct-bnb-4bit \
   --output_dir output \
   --prompt_type 2 \
