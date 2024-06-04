@@ -21,12 +21,18 @@ source activate myenv
 WORKDIR=/scratch/$USER/LlamaFinetuning
 cd ${WORKDIR}
 
-python3 ft_unsloth_llama3.py \
-  --dataset_name 2sat_50mixVars_50fixCls_0.3_1-hop_10K_500_OR \
-  --dataset_di dataset/Entailments/50vars_50cls \
+for number in 25 100
+do
+  python3 ft_unsloth_llama3.py \
+  --dataset_name 2sat_${number}mixVars_${number}fixCls_0.3_1-hop_10K_500_OR \
+  --dataset_di dataset/Entailments/${number}vars_${number}cls \
   --model_id unsloth/llama-3-8b-Instruct-bnb-4bit \
   --output_dir output \
   --prompt_type 1 \
   --batch_size 2 \
   --epochs 2
+done
+
+
+
 
