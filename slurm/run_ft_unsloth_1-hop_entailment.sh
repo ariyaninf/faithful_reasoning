@@ -21,7 +21,7 @@ source activate myenv
 WORKDIR=/scratch/$USER/LlamaFinetuning
 cd ${WORKDIR}
 
-for number in 25 50 100
+for number in 25 50
 do
   python3 ft_unsloth_llama3.py \
   --dataset_name 2sat_${number}mixVars_${number}fixCls_0.3_1-hop_100K_500_OR \
