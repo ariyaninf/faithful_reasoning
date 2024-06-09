@@ -25,7 +25,7 @@ for number in 25 50
 do
   python3 ft_unsloth_llama3.py \
   --dataset_name 2sat_${number}mixVars_${number}fixCls_1-hop_100K_inconsistencies_500_OR \
-  --dataset_di dataset/Inconsistencies/${number}vars_${number}cls \
+  --dataset_dir dataset/Inconsistencies/${number}vars_${number}cls \
   --model_id unsloth/llama-3-8b-Instruct-bnb-4bit \
   --output_dir output \
   --prompt_type 2 \
