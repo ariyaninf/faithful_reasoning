@@ -30,7 +30,8 @@ do
   --output_dir output \
   --prompt_type 1 \
   --batch_size 2 \
-  --epochs 2
+  --epochs 2 \
+  --save_steps 5000
 done
 
 
