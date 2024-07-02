@@ -189,7 +189,7 @@ if __name__ == '__main__':
             seed=3407,
             output_dir=output_dir,
             save_strategy="steps",
-            save_steps=2500
+            save_steps=5000
         )
     )
 
