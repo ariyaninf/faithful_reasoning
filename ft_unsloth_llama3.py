@@ -18,8 +18,9 @@ def init():
     args_parser.add_argument("--model_id", default="unsloth/llama-3-8b-Instruct-bnb-4bit", type=str)  
     args_parser.add_argument("--output_dir", default="output", type=str)
     args_parser.add_argument("--prompt_type", default=1, type=int)  # 1:entailment, 2/3/4:inconsistencies
-    args_parser.add_argument("--batch_size", default=2, type=int)
+    args_parser.add_argument("--batch_size", default=4, type=int)
     args_parser.add_argument("--epochs", default=2, type=int)
+    args_parser.add_argument("--save_steps", default=5000, type=int)
     args = args_parser.parse_args()
     return args
 
@@ -189,7 +190,7 @@ if __name__ == '__main__':
             seed=3407,
             output_dir=output_dir,
             save_strategy="steps",
-            save_steps=5000
+            save_steps=args.save_steps
         )
     )
 
