@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=ft_1-hop_entailment
+#SBATCH --job-name=ft_ent_25p_1hop
 #SBATCH --error=log/e.%x.%j
 #SBATCH --output=log/o.%x.%j
 #SBATCH --partition=gpu_v100
@@ -21,18 +21,15 @@ source activate myenv
 WORKDIR=/scratch/$USER/LlamaFinetuning
 cd ${WORKDIR}
 
-for number in 25 50
-do
-  python3 ft_unsloth_llama3.py \
-  --dataset_name 2sat_${number}mixVars_${number}fixCls_0.3_1-hop_100K_500_OR \
-  --dataset_dir dataset/Entailments/${number}vars_${number}cls \
+python3 ft_unsloth_llama3.py \
+  --dataset_name 2sat_25mixVars_25fixCls_1-hop_100K_500_OR_ent \
+  --dataset_dir dataset/Entailments/25vars_25cls \
   --model_id unsloth/llama-3-8b-Instruct-bnb-4bit \
   --output_dir output \
   --prompt_type 1 \
-  --batch_size 2 \
+  --batch_size 4 \
   --epochs 2 \
   --save_steps 5000
-done
 
 
 
