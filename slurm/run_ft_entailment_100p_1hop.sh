@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=ft_ent_100p_4hop
+#SBATCH --job-name=ft_ent_100p_1hop
 #SBATCH --error=log/e.%x.%j
 #SBATCH --output=log/o.%x.%j
 #SBATCH --partition=gpu_v100
