@@ -11,9 +11,10 @@ from peft import LoraConfig, prepare_model_for_kbit_training, get_peft_model
 def init():
     args_parser = argparse.ArgumentParser()
     args_parser.add_argument("--dataset_name", default="2sat_15_mixVars_50_mixCls_100K_500_OR", type=str)
-    args_parser.add_argument("--dataset_dir", default="dataset/Entailments_v4.2/", type=str)
-    args_parser.add_argument("--model_id", default="Qwen/Qwen2.5-7B-Instruct", type=str)
-    args_parser.add_argument("--output_dir", default="output/finetuned_model/", type=str)
+    args_parser.add_argument("--dataset_dir", default="dataset/Entailments_v5/", type=str)
+    args_parser.add_argument("--model_id", default="meta-llama/Meta-Llama-3-8B-Instruct", type=str)
+    args_parser.add_argument("--output_dir", default="output/Entailments_v5/", type=str)
+    args_parser.add_argument("--max_seq_length", default=1024, type=int)
     args_parser.add_argument("--prompt_type", default=1, type=int)
     args_parser.add_argument("--batch_size", default=4, type=int)
     args_parser.add_argument("--epochs", default=2, type=int)
@@ -78,29 +79,64 @@ def load_datasets():
 if __name__ == '__main__':
     args = init()
 
-    max_seq_length = 2048
+    max_seq_length = args.max_seq_length
     dtype = None
     load_in_4bit = True
     output_dir = os.path.join(args.output_dir, args.model_id, args.dataset_name + "_prompt_" + str(args.prompt_type))
 
-    nf4_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_compute_dtype=torch.bfloat16
-    )
+    model_id = args.model_id
 
-    model = AutoModelForCausalLM.from_pretrained(
-        args.model_id,
-        device_map='auto',
-        quantization_config=nf4_config,
-        use_cache=False
-    )
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    else:
+        print(f"Output directory {output_dir} already exists")
 
-    tokenizer = AutoTokenizer.from_pretrained(args.model_id)
+    tokenizer = AutoTokenizer.from_pretrained(model_id,
+                                              trust_remote_code=True)
 
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
+
+    # For 4 bit quantization
+    compute_dtype = getattr(torch, "float16")
+    quantization_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_use_double_quant=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype=compute_dtype,
+    )
+
+
+    def get_device_map() -> str:
+        return 'cuda' if torch.cuda.is_available() else 'cpu'
+
+
+    device_map = get_device_map()  # 'cpu'
+
+    model = AutoModelForCausalLM.from_pretrained(model_id,
+                                                 quantization_config=quantization_config,
+                                                 device_map={"": 0},
+                                                 )
+
+    training_args = TrainingArguments(
+        output_dir=output_dir,
+        num_train_epochs=args.epochs,
+        per_device_train_batch_size=args.batch_size,
+        per_device_eval_batch_size=args.batch_size,
+        gradient_accumulation_steps=1,
+        optim="paged_adamw_32bit",
+        learning_rate=2e-4,
+        weight_decay=0.001,
+        fp16=False,
+        bf16=False,
+        max_grad_norm=0.3,
+        warmup_ratio=0.03,
+        group_by_length=True,
+        lr_scheduler_type="linear",
+        do_eval=True,
+        evaluation_strategy="epoch",
+        save_strategy="epoch",
+    )
 
     peft_config = LoraConfig(
         lora_alpha=16,
@@ -108,50 +144,30 @@ if __name__ == '__main__':
         r=64,
         bias="none",
         task_type="CAUSAL_LM",
-        target_modules=["q_proj", "k_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+        # target_modules=["q_proj", "k_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
     )
 
-    model = prepare_model_for_kbit_training(model)
-    model = get_peft_model(model, peft_config)
-
-    training_args = TrainingArguments(
-        output_dir=output_dir,
-        num_train_epochs=args.epochs,
-        per_device_train_batch_size=args.batch_size,
-        warmup_steps=5,
-        logging_steps=1000,
-        save_strategy="epoch",
-        evaluation_strategy="epoch",
-        # evaluation_strategy="steps",
-        # eval_steps=args.save_steps,
-        learning_rate=2e-4,
-        bf16=True,
-        # lr_scheduler_type='linear',
-        lr_scheduler_type='constant',
-    )
-
+    torch.cuda.empty_cache()
     ds_train, ds_val = load_datasets()
     ds_train = ds_train.map(formatting_prompts_func)
-
     ds_val = ds_val.map(formatting_prompts_func)
 
     print(ds_train["text"][2])
 
     trainer = SFTTrainer(
         model=model,
-        peft_config=peft_config,
-        max_seq_length=max_seq_length,
-        tokenizer=tokenizer,
-        packing=True,
-        # formatting_func=create_prompt,
         args=training_args,
         train_dataset=ds_train,
         eval_dataset=ds_val,
-        dataset_text_field='text',
+        dataset_text_field="text",
+        tokenizer=tokenizer,
+        packing=False,
+        peft_config=peft_config,
+        max_seq_length=max_seq_length,
     )
 
-    trainer_stats = trainer.train()
+    trainer.train()
 
     pretrained_dir = os.path.join(output_dir, "lora_model")
-    model.save_pretrained(pretrained_dir)
-    tokenizer.save_pretrained(pretrained_dir)
+    trainer.model.save_pretrained(pretrained_dir)
+    trainer.tokenizer.save_pretrained(pretrained_dir)
