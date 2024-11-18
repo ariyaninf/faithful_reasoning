@@ -25,7 +25,8 @@ python3 ft_qlora.py \
   --dataset_name 2sat_15_mixVars_50_mixCls_100K_500_OR \
   --dataset_dir dataset/Entailments_v4.2/ \
   --model_id mistralai/Mixtral-8x7B-Instruct-v0.1 \
-  --output_dir output/finetuned_model/ \
+  --output_dir output/ \
+  --max_seq_length 1024 \
   --prompt_type 6 \
   --batch_size 4 \
   --epochs 2
